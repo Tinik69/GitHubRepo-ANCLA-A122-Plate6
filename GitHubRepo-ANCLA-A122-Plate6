@@ -1,0 +1,438 @@
+/**Write a java program that receives a list of edges of a simple graph, the program should determine whether it is connected
+and find the number of connected components if it is not connected. */
+import java.util.*;
+
+public class problem1 {
+    private Map<Integer, List<Integer>> adjacencyList;
+    private Set<Integer> visitedNodes;
+
+    public problem1() {
+        adjacencyList = new HashMap<>();
+        visitedNodes = new HashSet<>();
+    }
+
+    public void addEdge(int node1, int node2) {
+        adjacencyList.computeIfAbsent(node1, k -> new ArrayList<>()).add(node2);
+        adjacencyList.computeIfAbsent(node2, k -> new ArrayList<>()).add(node1);
+    }
+
+    public void searchgraph(int startNode) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(startNode);
+        visitedNodes.add(startNode);
+
+        while (!stack.isEmpty()) {
+            int currentNode = stack.pop();
+            for (int neighbor : adjacencyList.getOrDefault(currentNode, Collections.emptyList())) {
+                if (!visitedNodes.contains(neighbor)) {
+                    visitedNodes.add(neighbor);
+                    stack.push(neighbor);
+                }
+            }
+        }
+    }
+
+    public boolean isConnected() {
+        if (adjacencyList.isEmpty()) {
+            return true; 
+        }
+
+        int startNode = adjacencyList.keySet().iterator().next();
+        searchgraph(startNode);
+
+        return visitedNodes.size() == adjacencyList.size();
+    }
+
+    public int countConnectedComponents() {
+        visitedNodes.clear();
+        int componentCount = 0;
+
+        for (int node : adjacencyList.keySet()) {
+            if (!visitedNodes.contains(node)) {
+                searchgraph(node);
+                componentCount++;
+            }
+        }
+
+        return componentCount;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        problem1 graph = new problem1();
+
+        System.out.print("Enter the number of edges: ");
+        int numberOfEdges = scanner.nextInt();
+
+        System.out.println("Enter the edges:");
+        for (int i = 0; i < numberOfEdges; i++) {
+            int node1 = scanner.nextInt();
+            int node2 = scanner.nextInt();
+            graph.addEdge(node1, node2);
+        }
+
+        if (graph.isConnected()) {
+            System.out.println("The graph is connected.");
+        } else {
+            int components = graph.countConnectedComponents();
+            System.out.println("The graph is not connected.");
+            System.out.println("Number of connected components: " + components);
+        }
+
+        scanner.close();
+    }
+}
+
+
+
+/**Write a java program that accepts an adjacency matrix of a graph. The program should list the edges of this graph and give
+the number of times each edge appears. */
+
+import java.util.*;
+
+public class problem2 {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of vertices: ");
+        int vertices = scanner.nextInt();
+
+        int[][] adjacencyMatrix = new int[vertices][vertices];
+
+        System.out.println("Enter the adjacency matrix:");
+        for (int i = 0; i < vertices; i++) {
+            for (int j = 0; j < vertices; j++) {
+                adjacencyMatrix[i][j] = scanner.nextInt();
+            }
+        }
+
+        
+        Map<String, Integer> edgeCount = new HashMap<>();
+
+        for (int i = 0; i < vertices; i++) {
+            for (int j = 0; j < vertices; j++) {
+                if (adjacencyMatrix[i][j] > 0) {
+                    String edge = "(" + (i+1) + ", " + (j+1) + ")";
+                    edgeCount.put(edge, edgeCount.getOrDefault(edge, 0) + adjacencyMatrix[i][j]);
+                }
+            }
+        }
+
+        System.out.println("Edges and their counts:");
+        for (Map.Entry<String, Integer> entry : edgeCount.entrySet()) {
+            System.out.println(entry.getKey() + " appears " + entry.getValue() + " time(s)");
+        }
+
+        scanner.close();
+    }
+}
+
+
+
+/**Write a java program that will determine if a graph has a cycle or not. */
+import java.util.*;
+
+public class problem3 { 
+    public static void main (String[] args) {
+        Scanner scanner = new Scanner (System.in);
+        System.out.print("Enter the number of vertices: ");
+        int numofVertices = scanner.nextInt();
+        System.out.print("Enter the number of edges: ");
+        int numEdges = scanner.nextInt();
+        List<int[]> edges = new ArrayList<>();
+        System.out.println("Enter the edges:");
+        for (int i = 0; i < numEdges; i++) {
+            int vertex1 = scanner.nextInt();
+            int vertex2 = scanner.nextInt();
+            edges.add(new int[] { vertex1 - 1, vertex2 - 1 });
+        }
+
+        boolean hasCycle = hasCycle(numofVertices, edges);
+        if (hasCycle == true){
+            System.out.println("Graph has a cycle");
+        } else{
+            System.out.println("Graph has no cycle");
+        }
+        
+        scanner.close();
+    }
+    private static int find(int[] parent, int node) {
+        if (parent[node] != node) {
+            parent[node] = find(parent, parent[node]);
+        }
+        return parent[node];
+    }
+    private static boolean hasCycle(int numofVertices, List<int[]> edges) {
+        int[] parent = new int[numofVertices];
+        for (int i = 0; i < numofVertices; i++){
+            parent[i] = i;
+        }
+        for (int[] edge : edges) {
+            int root1 = find(parent, edge[0]);
+            int root2 = find(parent, edge[1]);
+            if (root1 == root2)
+                return true;
+            parent[root1] = root2;
+        }
+        return false;
+    }
+}
+
+
+
+
+//*  Write a java program, given the pair of vertex associated to the edges of an undirected graph, it will output the degree of each vertex.
+import java.util.*;
+
+public class problem4 {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        HashMap<Integer, Integer> degreeMap = new HashMap<>();
+        
+        System.out.print("Enter the number of edges: ");
+        int numberOfEdges = scanner.nextInt();
+        
+        System.out.println("Enter the pair of vertices:");
+        for (int i = 0; i < numberOfEdges; i++) {
+            int vertex1 = scanner.nextInt();
+            int vertex2 = scanner.nextInt();
+            
+            degreeMap.put(vertex1, degreeMap.getOrDefault(vertex1, 0) + 1);
+            degreeMap.put(vertex2, degreeMap.getOrDefault(vertex2, 0) + 1);
+        }
+        
+        scanner.close();
+
+        System.out.println("Degree of each vertex:");
+        for (Map.Entry<Integer, Integer> entry : degreeMap.entrySet()) {
+            System.out.println("Vertex " + entry.getKey() + ": " + entry.getValue());
+        }
+    }
+}
+
+
+
+
+/*Write a java program that receives a list of edges of a simple graph and determine whether the graph is bipartite. */
+import java.util.*;
+
+public class problem5 {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of vertices: ");
+        int numVertices = scanner.nextInt();
+        System.out.print("Enter the number of edges: ");
+        int numEdges = scanner.nextInt();
+        System.out.println("Enter the edges of the graph:");
+        List<Edge> edges = new ArrayList<>();
+        for (int i = 0; i < numEdges; i++) {
+            int u = scanner.nextInt();
+            int v = scanner.nextInt();
+            edges.add(new Edge(u, v));
+        }
+        scanner.close();
+
+        problem5 checker = new problem5();
+        boolean isBipartite = checker.isGraphBipartite(edges, numVertices);
+        if (isBipartite) {
+            System.out.println("The graph is bipartite.");
+        } else {
+            System.out.println("The graph is not bipartite.");
+        }
+    }
+
+    public boolean isGraphBipartite(List<Edge> edges, int numVertices) {
+        List<Integer> color = new ArrayList<>(numVertices);
+        for (int i = 0; i < numVertices; i++) {
+            color.add(-1);
+        }
+
+        for (Edge edge : edges) {
+            if (color.get(edge.u) == -1) {
+                color.set(edge.u, 0);
+            }
+            if (color.get(edge.v) == -1) {
+                color.set(edge.v, 1 - color.get(edge.u));
+            } else if (color.get(edge.u) == color.get(edge.v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static class Edge {
+        int u;
+        int v;
+
+        public Edge(int u, int v) {
+            this.u = u;
+            this.v = v;
+        }
+    }
+}
+
+
+
+
+/** Write a java program that receives the vertex pairs associated to the edges of a graph, the program should construct an adjacency matrix for the graph. */
+import java.util.*;
+
+public class problem6 {
+    private int[][] adjacencyMatrix;
+    private int numberOfVertices;
+
+    public problem6(int numberOfVertices) {
+        this.numberOfVertices = numberOfVertices;
+        adjacencyMatrix = new int[numberOfVertices][numberOfVertices];
+    }
+
+    public void addEdge(int vertex1, int vertex2) {
+        adjacencyMatrix[vertex1][vertex2]++;
+    }
+
+    public void printAdjacencyMatrix() {
+        for (int i = 0; i < numberOfVertices; i++) {
+            for (int j = 0; j < numberOfVertices; j++) {
+                System.out.print(adjacencyMatrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of vertices: ");
+        int numberOfVertices = scanner.nextInt();
+
+        problem6 graph = new problem6(numberOfVertices);
+
+        System.out.println("Enter the edges (format: vertex1 vertex2), type 'end' to stop:");
+        while (scanner.hasNext()) {
+            String input = scanner.next();
+            if (input.equalsIgnoreCase("end")) {
+                break;
+            }
+            int vertex1 = Integer.parseInt(input);
+            int vertex2 = scanner.nextInt();
+            graph.addEdge(vertex1, vertex2);
+        }
+
+        System.out.println("Adjacency Matrix:");
+        graph.printAdjacencyMatrix();
+        
+        scanner.close();
+    }
+}
+
+
+
+/*Write a java program that accepts vertex pairs associated to the edges of an undirected graph and the number of times each edge appears as input. 
+The program should construct an incidence matrix for the graph. */
+import java.util.*;
+
+public class problem7 {
+
+    public static void main (String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of vertices: ");
+        int vertices = scanner.nextInt();
+        System.out.print("Enter the number of edges: ");
+        int numofEdges = scanner.nextInt();
+        List<int[]> edges = new ArrayList<>();
+        System.out.println("Enter the edges (vertex1 vertex2):");
+        for (int i = 0; i < numofEdges; i++) {
+            int u = scanner.nextInt();
+            int v = scanner.nextInt();
+            edges.add(new int[] { u, v });
+        }
+        
+
+        int[][] incMatrix = makeIncMatrix(vertices, edges);
+        System.out.println("Incidence Matrix:");
+        printMatrix(incMatrix);
+        scanner.close();
+    }
+
+    private static int[][] makeIncMatrix(int vertices, List<int[]> edges) {
+        int[][] incMatrix = new int[vertices][edges.size()];
+        for (int i = 0; i < edges.size(); i++) {
+            int[] edge = edges.get(i);
+            incMatrix[edge[0]][i] = 1;
+            if (edge[0] != edge[1]) {
+                incMatrix[edge[1]][i] = 1;
+            }
+        }
+        return incMatrix;
+    }
+    private static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println();
+        }
+    }
+}
+
+
+
+
+
+
+/**Write a Java program that checks whether two graphs are isomorphic or not, given a set of vertices. */
+
+import java.util.*;
+public class problem8 {
+    public static void main (String[] args) {
+        Scanner scanner = new Scanner (System.in);
+        System.out.print("Enter the number of vertices: ");
+        int vertices = scanner.nextInt();
+        System.out.print("Enter the number of edges for the first graph: ");
+        int numEdges1 = scanner.nextInt();
+        List<int[]> edges1 = new ArrayList<>();
+        System.out.println("Enter the edges for the first graph:");
+        for (int i = 0; i < numEdges1; i++) {
+            int vertex1 = scanner.nextInt();
+            int vertex2 = scanner.nextInt();
+            edges1.add(new int[] { (vertex1 - 1), (vertex2 - 1) });
+        }
+
+        System.out.print("Enter the number of edges for the second graph: ");
+        int numEdges2 = scanner.nextInt();
+        List<int[]> edges2 = new ArrayList<>();
+        System.out.println("Enter the edges for the second graph:");
+        for (int i = 0; i < numEdges2; i++) {
+            int vertex1 = scanner.nextInt();
+            int vertex2 = scanner.nextInt();
+            edges2.add(new int[] { (vertex1 - 1), (vertex2 - 1) });
+        }
+
+        boolean isIsomorphic = areIsomorphic(vertices, edges1, edges2);
+        if (isIsomorphic == true) {
+            System.out.println("The graphs are isomorphic.");
+        } else {
+            System.out.println("The graphs are not isomorphic.");
+        }
+        scanner.close();
+    }
+
+    private static boolean areIsomorphic(int vertices, List<int[]> edges1, List<int[]> edges2) {
+        if (edges1.size() != edges2.size())
+            return false;
+
+        int[][] adjMatrix1 = makeAdjMatrix(vertices, edges1);
+        int[][] adjMatrix2 = makeAdjMatrix(vertices, edges2);
+
+        return Arrays.deepEquals(adjMatrix1, adjMatrix2);
+    }
+    private static int[][] makeAdjMatrix(int vertices, List<int[]> edges) {
+        int[][] adjMatrix = new int[vertices][vertices];
+        for (int[] edge : edges) {
+            adjMatrix[edge[0]][edge[1]]++;
+        }
+        return adjMatrix;
+    }
+}
